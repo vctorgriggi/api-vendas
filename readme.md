@@ -12,3 +12,6 @@ https://claude.ai/artifact/71fuEpCrAzrZzCS6kyVzKo
 
 # Documentação GitHub Actions (CI/CD) GUIA
 https://claude.ai/artifact/F21uNn1PE4FpN3ewMj6Aw6
+
+# Aluno
+Victor Griggi
