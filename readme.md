@@ -14,7 +14,7 @@ https://claude.ai/artifact/71fuEpCrAzrZzCS6kyVzKo
 https://claude.ai/artifact/F21uNn1PE4FpN3ewMj6Aw6
 
 # Aluno
-Victor Griggi
+Victor Griggi Moreira Regis da Silva
 
 # fornecedores-service
 
