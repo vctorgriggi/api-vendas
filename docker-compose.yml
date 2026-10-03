@@ -27,6 +27,12 @@ services:
       # e as portas publicadas abaixo apontariam para onde ninguem escuta.
       - SPRING_PROFILES_ACTIVE=native
       - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:///config-repo
+    # so fica healthy quando ja responde config, os servicos esperam por isso
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8888/produtos-service/default"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
     networks:
       - microservicos-net
 
@@ -35,8 +41,10 @@ services:
     build: ./produtos-service
     container_name: produtos-service
     depends_on:                    # só cria este container depois dos dois abaixo
-      - eureka-server               # (não garante que já estejam "prontos", só criados)
-      - config-server
+      eureka-server:
+        condition: service_started
+      config-server:               # espera o config-server responder (healthcheck)
+        condition: service_healthy
     environment:
       # troca "localhost" por "config-server", o nome do serviço na rede Docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
@@ -55,8 +63,10 @@ services:
     build: ./vendas-service
     container_name: vendas-service
     depends_on:
-      - eureka-server
-      - config-server
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       # ativa o profile "docker", que faz o config-server servir também
@@ -72,8 +82,10 @@ services:
     build: ./clientes-service
     container_name: clientes-service
     depends_on:
-      - eureka-server
-      - config-server
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       # ativa o profile "docker", que faz o config-server servir também
@@ -85,13 +97,34 @@ services:
     networks:
       - microservicos-net
 
+  # --- servico de fornecedores ---
+  fornecedores-service:
+    build: ./fornecedores-service
+    container_name: fornecedores-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_healthy
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      # perfil docker carrega fornecedores-service-docker.properties
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    ports:
+      - "8084:8084"
+    networks:
+      - microservicos-net
+
   # --- Servico de cadastro de usuarios ---
   auth-service:
     build: ./auth-service
     container_name: auth-service
     depends_on:
-      - eureka-server
-      - config-server
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_healthy
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       # ativa o profile "docker", que faz o config-server servir também
