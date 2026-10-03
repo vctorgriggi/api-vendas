@@ -1,5 +1,6 @@
 package com.exemplo.fornecedoresservice.controller;
 
+import com.exemplo.fornecedoresservice.dto.ProdutoDTO;
 import com.exemplo.fornecedoresservice.model.Fornecedor;
 import com.exemplo.fornecedoresservice.service.FornecedorService;
 import jakarta.validation.Valid;
@@ -39,5 +40,11 @@ public class FornecedorController {
     @PostMapping
     public ResponseEntity<Fornecedor> criar(@Valid @RequestBody Fornecedor fornecedor) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(fornecedor));
+    }
+
+    // produtos vindos do produtos-service via feign
+    @GetMapping("/produtos")
+    public List<ProdutoDTO> listarProdutos() {
+        return service.listarProdutos();
     }
 }

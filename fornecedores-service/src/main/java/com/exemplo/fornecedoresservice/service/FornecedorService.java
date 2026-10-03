@@ -1,7 +1,10 @@
 package com.exemplo.fornecedoresservice.service;
 
+import com.exemplo.fornecedoresservice.client.ProdutoClient;
+import com.exemplo.fornecedoresservice.dto.ProdutoDTO;
 import com.exemplo.fornecedoresservice.model.Fornecedor;
 import com.exemplo.fornecedoresservice.repository.FornecedorRepository;
+import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,9 +16,11 @@ import java.util.Optional;
 public class FornecedorService {
 
     private final FornecedorRepository fornecedorRepository;
+    private final ProdutoClient produtoClient;
 
-    public FornecedorService(FornecedorRepository fornecedorRepository) {
+    public FornecedorService(FornecedorRepository fornecedorRepository, ProdutoClient produtoClient) {
         this.fornecedorRepository = fornecedorRepository;
+        this.produtoClient = produtoClient;
     }
 
     public List<Fornecedor> listarTodos() {
@@ -33,5 +38,13 @@ public class FornecedorService {
         // ignora id vindo no json para nao sobrescrever um registro existente
         fornecedor.setId(null);
         return fornecedorRepository.save(fornecedor);
+    }
+
+    public List<ProdutoDTO> listarProdutos() {
+        try {
+            return produtoClient.listarTodos();
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "produtos-service indisponivel");
+        }
     }
 }
