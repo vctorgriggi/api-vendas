@@ -1,0 +1,21 @@
+name: fornecedores-service
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: compila com maven
+        working-directory: fornecedores-service
+        run: mvn -B package
